@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            user-select: none;
+        }
+        #videoPlayer {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <video id="videoPlayer" 
+        src="https://archive.org/download/original-rick-roll/Original%20mp4.mp4"
+        autoplay 
+        loop
+        playsinline
+        muted>
+    </video>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+
+        function activarPantallaCompleta() {
+            try {
+                if (!document.fullscreenElement) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    } else if (document.documentElement.msRequestFullscreen) {
+                        document.documentElement.msRequestFullscreen();
+                    }
+                }
+                video.play();
+                video.volume = 1;
+                video.muted = false;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // Intentar activar pantalla completa al cargar la página
+        window.addEventListener('load', () => {
+            activarPantallaCompleta();
+        });
+
+        // Verificar periódicamente y reactivar pantalla completa si se sale
+        setInterval(() => {
+            if (!document.fullscreenElement) {
+                activarPantallaCompleta();
+            }
+        }, 200);
+
+        // Bloquear eventos para intentar impedir que el usuario salga de pantalla completa
+        const bloquearEventos = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            activarPantallaCompleta();
+            return false;
+        };
+
+        document.addEventListener('keydown', bloquearEventos, true);
+        ['click', 'touchstart', 'mousedown', 'mouseup', 'mousemove', 
+         'contextmenu', 'selectstart', 'select', 'copy', 'cut', 'paste'].forEach(evt => {
+            document.addEventListener(evt, bloquearEventos, true);
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                setTimeout(activarPantallaCompleta, 100);
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                activarPantallaCompleta();
+                video.play();
+            }
+        });
+
+        window.onbeforeunload = function() { return ''; };
+    </script>
+</body>
+</html>
